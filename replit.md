@@ -10,7 +10,7 @@ A Flask-based web application for managing contract review checklists with Excel
   - User: username `user`, password `user123`
 - **Admin Panel**: Master data management for users (username, name, email, department, password, role)
 - **Excel Integration**: Upload Excel files with multiple worksheets and display in interactive spreadsheet format
-- **Excel Download**: Download current checklist data as Excel file with same template format - keeps raw Excel editable
+- **Excel Download**: Download current checklist data as Excel file with same template format - keeps raw Excel editable with GTN logo and all formatting preserved
 - **Multi-Worksheet Support**: Navigate between all Excel worksheets via tabs (CR 1-6, PED-1, PED-2, Lead Time, etc.)
 - **Editable Grid**: Handsontable-powered Excel-like interface with sorting, filtering, and inline editing
 - **Auto-save**: Changes are automatically saved to SQLite database per worksheet

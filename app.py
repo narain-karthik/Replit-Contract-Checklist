@@ -5,6 +5,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 import os
 import openpyxl
+from openpyxl.drawing.image import Image as XLImage
 import pandas as pd
 import json
 from datetime import datetime
@@ -320,6 +321,7 @@ def download_excel():
         db = get_db()
         
         template_file = 'attached_assets/CR Check List - Latest Format_1760583521780.xlsx'
+        logo_file = 'static/GTN_LOGO.png'
         
         if os.path.exists(template_file):
             wb = openpyxl.load_workbook(template_file)
@@ -355,6 +357,12 @@ def download_excel():
                 for row_idx, row_data in enumerate(data_grid):
                     for col_idx, cell_value in enumerate(row_data):
                         ws.cell(row=row_idx+2, column=col_idx+1, value=cell_value)
+            
+            if os.path.exists(logo_file):
+                img = XLImage(logo_file)
+                img.width = 80
+                img.height = 80
+                ws.add_image(img, 'A1')
         
         db.close()
         
