@@ -319,14 +319,23 @@ def download_excel():
     try:
         db = get_db()
         
-        wb = openpyxl.Workbook()
-        wb.remove(wb.active)
+        template_file = 'attached_assets/CR Check List - Latest Format_1760583521780.xlsx'
+        
+        if os.path.exists(template_file):
+            wb = openpyxl.load_workbook(template_file)
+        else:
+            wb = openpyxl.Workbook()
+            wb.remove(wb.active)
         
         worksheets = db.execute("SELECT * FROM worksheets ORDER BY display_order").fetchall()
         
         for worksheet in worksheets:
             sheet_name = worksheet['sheet_name']
-            ws = wb.create_sheet(title=sheet_name)
+            
+            if sheet_name in wb.sheetnames:
+                ws = wb[sheet_name]
+            else:
+                ws = wb.create_sheet(title=sheet_name)
             
             structure = db.execute("SELECT * FROM checklist_structure WHERE sheet_name = ?", (sheet_name,)).fetchone()
             
@@ -334,9 +343,6 @@ def download_excel():
                 headers = json.loads(structure['headers'])
                 total_rows = structure['total_rows']
                 total_cols = structure['total_cols']
-                
-                for col_idx, header in enumerate(headers):
-                    ws.cell(row=1, column=col_idx+1, value=header)
                 
                 data_rows = db.execute("SELECT * FROM checklist_data WHERE sheet_name = ?", (sheet_name,)).fetchall()
                 
