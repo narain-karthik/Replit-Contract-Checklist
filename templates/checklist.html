@@ -34,6 +34,22 @@
         <button class="btn btn-info" onclick="saveAllData()">
             Save Changes
         </button>
+        <button class="btn btn-secondary" onclick="toggleContractView()">
+            <span id="toggleText">Show Contract Document</span>
+        </button>
+    </div>
+</div>
+
+<div class="row mb-3" id="contractViewContainer" style="display: none;">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Contract Review Document</h5>
+            </div>
+            <div class="card-body p-0">
+                <iframe width="100%" height="500" frameborder="0" scrolling="no" src="https://gtnenggdiv-my.sharepoint.com/personal/gtnit_gtnengg_net/_layouts/15/Doc.aspx?sourcedoc={7312cff3-2f25-4be1-a492-4cf589792536}&action=embedview&wdAllowInteractivity=False&wdHideHeaders=True&wdDownloadButton=True&wdInConfigurator=True&wdInConfigurator=True"></iframe>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -189,6 +205,19 @@
 
     function downloadExcel() {
         window.location.href = '/download_excel';
+    }
+
+    function toggleContractView() {
+        const container = document.getElementById('contractViewContainer');
+        const toggleText = document.getElementById('toggleText');
+        
+        if (container.style.display === 'none') {
+            container.style.display = 'block';
+            toggleText.textContent = 'Hide Contract Document';
+        } else {
+            container.style.display = 'none';
+            toggleText.textContent = 'Show Contract Document';
+        }
     }
 </script>
 {% endblock %}
