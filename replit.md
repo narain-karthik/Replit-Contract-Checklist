@@ -21,7 +21,7 @@ A Flask-based web application for managing contract review checklists with Excel
 - **Authentication**: Flask-Login
 - **Security**: Flask-WTF (CSRF Protection)
 - **Database**: SQLite3
-- **Excel Processing**: openpyxl, pandas
+- **Excel Processing**: openpyxl, pandas, Pillow (for logo embedding)
 - **Frontend**: HTML, CSS, JavaScript, Bootstrap 5
 - **Spreadsheet UI**: Handsontable
 
@@ -69,6 +69,8 @@ A Flask-based web application for managing contract review checklists with Excel
 - **Updated database schema**: Added worksheets table and sheet_name columns to support multiple worksheets
 - **Enhanced security**: Added CSRF protection for all authenticated routes using Flask-WTF
 - **Added Excel download feature**: Users can now download the current checklist data as an Excel file with the same template format, making it easy to edit offline and maintain the raw Excel file
+- **Logo preservation in Excel export**: GTN logo is programmatically re-inserted into downloaded Excel files using openpyxl.drawing.image, ensuring brand consistency in exported documents
+- **Pillow dependency added**: Required for embedding images in Excel files during export
 
 ## Configuration
 - Session secret: Uses SESSION_SECRET environment variable (or dev key)
