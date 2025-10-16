@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_file
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_wtf.csrf import CSRFProtect
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -312,6 +312,55 @@ def save_cell():
     db.close()
     
     return jsonify({'success': True})
+
+@app.route('/download_excel')
+@login_required
+def download_excel():
+    try:
+        db = get_db()
+        
+        wb = openpyxl.Workbook()
+        wb.remove(wb.active)
+        
+        worksheets = db.execute("SELECT * FROM worksheets ORDER BY display_order").fetchall()
+        
+        for worksheet in worksheets:
+            sheet_name = worksheet['sheet_name']
+            ws = wb.create_sheet(title=sheet_name)
+            
+            structure = db.execute("SELECT * FROM checklist_structure WHERE sheet_name = ?", (sheet_name,)).fetchone()
+            
+            if structure:
+                headers = json.loads(structure['headers'])
+                total_rows = structure['total_rows']
+                total_cols = structure['total_cols']
+                
+                for col_idx, header in enumerate(headers):
+                    ws.cell(row=1, column=col_idx+1, value=header)
+                
+                data_rows = db.execute("SELECT * FROM checklist_data WHERE sheet_name = ?", (sheet_name,)).fetchall()
+                
+                data_grid = [['' for _ in range(total_cols)] for _ in range(total_rows)]
+                
+                for row in data_rows:
+                    if row['row_index'] < total_rows and row['col_index'] < total_cols:
+                        data_grid[row['row_index']][row['col_index']] = row['value'] or ''
+                
+                for row_idx, row_data in enumerate(data_grid):
+                    for col_idx, cell_value in enumerate(row_data):
+                        ws.cell(row=row_idx+2, column=col_idx+1, value=cell_value)
+        
+        db.close()
+        
+        excel_filename = f'attached_assets/CR_Checklist_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
+        wb.save(excel_filename)
+        
+        return send_file(excel_filename, 
+                        as_attachment=True, 
+                        download_name=f'CR_Checklist_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx',
+                        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    except Exception as e:
+        return jsonify({'success': False, 'message': str(e)})
 
 if __name__ == '__main__':
     init_db()

@@ -28,6 +28,9 @@
         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#uploadModal">
             Upload Excel File
         </button>
+        <button class="btn btn-primary" onclick="downloadExcel()">
+            Download Excel File
+        </button>
         <button class="btn btn-info" onclick="saveAllData()">
             Save Changes
         </button>
@@ -182,6 +185,10 @@
 
     function saveAllData() {
         alert('All changes are automatically saved!');
+    }
+
+    function downloadExcel() {
+        window.location.href = '/download_excel';
     }
 </script>
 {% endblock %}
