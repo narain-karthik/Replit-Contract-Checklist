@@ -11,6 +11,7 @@ A Flask-based web application for managing contract review checklists with Excel
 - **Admin Panel**: Master data management for users (username, name, email, department, password, role)
 - **Excel Integration**: Upload Excel files with multiple worksheets and display in interactive spreadsheet format
 - **Excel Download**: Download current checklist data as Excel file with same template format - keeps raw Excel editable with GTN logo and all formatting preserved
+- **Contract Document Viewer**: Embedded SharePoint document viewer with toggle functionality to view contract while filling checklist
 - **Multi-Worksheet Support**: Navigate between all Excel worksheets via tabs (CR 1-6, PED-1, PED-2, Lead Time, etc.)
 - **Editable Grid**: Handsontable-powered Excel-like interface with sorting, filtering, and inline editing
 - **Auto-save**: Changes are automatically saved to SQLite database per worksheet
@@ -71,6 +72,7 @@ A Flask-based web application for managing contract review checklists with Excel
 - **Added Excel download feature**: Users can now download the current checklist data as an Excel file with the same template format, making it easy to edit offline and maintain the raw Excel file
 - **Logo preservation in Excel export**: GTN logo is programmatically re-inserted into downloaded Excel files using openpyxl.drawing.image, ensuring brand consistency in exported documents
 - **Pillow dependency added**: Required for embedding images in Excel files during export
+- **SharePoint contract viewer integration**: Added embedded SharePoint document viewer to checklist page with toggle functionality, allowing users to view the contract document while filling out the checklist review
 
 ## Configuration
 - Session secret: Uses SESSION_SECRET environment variable (or dev key)
