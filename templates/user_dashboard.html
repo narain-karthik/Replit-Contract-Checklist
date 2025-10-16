@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}User Dashboard - Contract Review Checklist{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>Welcome, {{ current_user.name }}</h2>
+        <hr>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Your Profile</h5>
+                <p><strong>Username:</strong> {{ current_user.username }}</p>
+                <p><strong>Email:</strong> {{ current_user.email }}</p>
+                <p><strong>Department:</strong> {{ current_user.department }}</p>
+                <p><strong>Role:</strong> <span class="badge bg-primary">{{ current_user.role|title }}</span></p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Quick Access</h5>
+                <a href="{{ url_for('checklist') }}" class="btn btn-primary mb-2 w-100">
+                    View Contract Review Checklist
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

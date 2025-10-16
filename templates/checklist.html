@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Contract Review Checklist{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css" rel="stylesheet">
+<style>
+    .checklist-container {
+        margin-top: 20px;
+    }
+    #hot-container {
+        overflow: auto;
+        max-height: 600px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>Contract Review Checklist</h2>
+        <hr>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-12">
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#uploadModal">
+            Upload Excel File
+        </button>
+        <button class="btn btn-info" onclick="saveAllData()">
+            Save Changes
+        </button>
+    </div>
+</div>
+
+{% if worksheets %}
+<div class="row mb-3">
+    <div class="col-12">
+        <ul class="nav nav-tabs" id="worksheetTabs" role="tablist">
+            {% for worksheet in worksheets %}
+            <li class="nav-item" role="presentation">
+                <a class="nav-link {% if worksheet.sheet_name == current_sheet %}active{% endif %}" 
+                   href="{{ url_for('checklist', sheet_name=worksheet.sheet_name) }}"
+                   role="tab">
+                    {{ worksheet.sheet_name }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endif %}
+
+<div class="row checklist-container">
+    <div class="col-12">
+        <div id="hot-container"></div>
+    </div>
+</div>
+
+<div class="modal fade" id="uploadModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Upload Excel File</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <div class="mb-3">
+                        <label for="excelFile" class="form-label">Select Excel File</label>
+                        <input type="file" class="form-control" id="excelFile" name="file" accept=".xlsx,.xls" required>
+                    </div>
+                    <div id="uploadStatus"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="uploadExcel()">Upload</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
+<script>
+    let hotInstance = null;
+    
+    const headers = {{ headers|tojson }};
+    const data = {{ data|tojson }};
+    const currentSheet = {{ current_sheet|tojson }};
+
+    if (headers.length > 0 && data.length > 0) {
+        const container = document.getElementById('hot-container');
+        hotInstance = new Handsontable(container, {
+            data: data,
+            colHeaders: headers,
+            rowHeaders: true,
+            width: '100%',
+            height: 550,
+            licenseKey: 'non-commercial-and-evaluation',
+            stretchH: 'all',
+            autoWrapRow: true,
+            autoWrapCol: true,
+            manualRowResize: true,
+            manualColumnResize: true,
+            contextMenu: true,
+            filters: true,
+            dropdownMenu: true,
+            columnSorting: true,
+            afterChange: function(changes, source) {
+                if (source === 'edit') {
+                    changes.forEach(function([row, prop, oldValue, newValue]) {
+                        const col = hotInstance.propToCol(prop);
+                        saveCell(row, col, newValue);
+                    });
+                }
+            }
+        });
+    } else {
+        document.getElementById('hot-container').innerHTML = '<div class="alert alert-info">No checklist data available. Please upload an Excel file.</div>';
+    }
+
+    function uploadExcel() {
+        const formData = new FormData();
+        const fileInput = document.getElementById('excelFile');
+        const csrfToken = document.getElementById('csrf_token').value;
+        
+        if (!fileInput.files[0]) {
+            alert('Please select a file');
+            return;
+        }
+        
+        formData.append('file', fileInput.files[0]);
+        formData.append('csrf_token', csrfToken);
+        
+        fetch('/upload_excel', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('uploadStatus').innerHTML = '<div class="alert alert-success">File uploaded successfully! Reloading...</div>';
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            } else {
+                document.getElementById('uploadStatus').innerHTML = '<div class="alert alert-danger">Error: ' + data.message + '</div>';
+            }
+        })
+        .catch(error => {
+            document.getElementById('uploadStatus').innerHTML = '<div class="alert alert-danger">Error uploading file</div>';
+        });
+    }
+
+    function saveCell(row, col, value) {
+        const csrfToken = document.getElementById('csrf_token').value;
+        fetch('/save_cell', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({
+                sheet_name: currentSheet,
+                row: row,
+                col: col,
+                value: value
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                alert('Error saving cell');
+            }
+        });
+    }
+
+    function saveAllData() {
+        alert('All changes are automatically saved!');
+    }
+</script>
+{% endblock %}
